@@ -15,3 +15,11 @@ go build -o showip-app main.go
 ```
 ./showip-app
 ```
+
+## Running in production
+Use nodejs package manager
+```
+yum install nodejs -y
+npm install -g pm2
+pm2 start showip-app
+```
