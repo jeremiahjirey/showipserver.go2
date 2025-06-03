@@ -1,17 +1,12 @@
-# Gunakan image official Go
-FROM golang:1.21
+FROM golang:1.24.3
 
-# Set working directory di dalam container
 WORKDIR /app
 
-# Copy semua file ke dalam container (termasuk go.mod, go.sum, dan *.go)
-COPY main.go .
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Build binary
+COPY . .
 RUN go build -o main
 
-# Expose port yang digunakan aplikasi
 EXPOSE 8080
-
-# Jalankan binary saat container start
 CMD ["./main"]
