@@ -1,18 +1,20 @@
 name: CI/CD Pipeline
  
 on:
-   push:
-     branches:
-       - dev
-     paths:
-        - .github/workflows/deployment.yaml
-        - deployment.yaml
- 
+  workflow_run:
+    workflows:
+      - terraform
+    types:
+      - completed
+
 jobs:
    install:
-     runs-on: ubuntu-latest
+    if: >
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
  
-     steps:
+    steps:
        - name: Checkout code
          uses: actions/checkout@v3
  
@@ -50,7 +52,7 @@ jobs:
          env:
            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
            ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-           IMAGE_TAG: ${{ github.sha }}
+           IMAGE_TAG: go-image
          run: |
            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -86,28 +88,28 @@ jobs:
          run: kubectl get node -A
 
         
-       - name: Delete Old Secrett
-         run: kubectl delete secret pod-secret
+       #- name: Delete Old Secrett
+       #  run: kubectl delete secret pod-secret
 
-       - name: Create Secret
-         run: |
-            kubectl create secret generic pod-secret \
-            --from-literal=ATHENA_DB=${{ secrets.ATHENA_DB }} \
-            --from-literal=FLASK_SECRET_KEY=${{ secrets.FLASK_SECRET_KEY }} \
-            --from-literal=S3_STAGING_DIR=${{ secrets.S3_STAGING_DIR }} \
-            --from-literal=SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }} \
-            --from-literal=API_GATEWAY_URL=${{ secrets.API_GATEWAY_URL }} \
-            --from-literal=ATHENA_SCHEMA_NAME=${{ secrets.ATHENA_SCHEMA_NAME }} \
-            --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            --from-literal=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            --from-literal=AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
+       #- name: Create Secret
+       #  run: |
+       #     kubectl create secret generic pod-secret \
+       #     --from-literal=ATHENA_DB=${{ secrets.ATHENA_DB }} \
+       #     --from-literal=FLASK_SECRET_KEY=${{ secrets.FLASK_SECRET_KEY }} \
+       #     --from-literal=S3_STAGING_DIR=${{ secrets.S3_STAGING_DIR }} \
+       #     --from-literal=SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }} \
+       #     --from-literal=API_GATEWAY_URL=${{ secrets.API_GATEWAY_URL }} \
+       #     --from-literal=ATHENA_SCHEMA_NAME=${{ secrets.ATHENA_SCHEMA_NAME }} \
+       #    --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+       #     --from-literal=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+       #     --from-literal=AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
                   
 
 
-       - name: Delete Old Deployment
-         run:  |
-          kubectl delete deployment flask
-          kubectl delete svc flask-app-service 
+       #- name: Delete Old Deployment
+       #  run:  |
+       #   kubectl delete deployment flask
+       #   kubectl delete svc flask-app-service 
           
        - name: Deploy to EKS
          env:

@@ -19,7 +19,7 @@ jobs:
       REGION_REGION: ${{ secrets.AWS_REGION }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v4
 
     - name: Setup Terraform
