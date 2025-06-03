@@ -178,3 +178,49 @@ resource "aws_ecr_repository" "goecr" {
   }
 }
 
+#######
+# EKS #
+#######
+data "aws_iam_role" "existing_lab_role" {
+    name = "LabRole"
+}
+
+resource "aws_eks_cluster" "cluster" {
+  name = "clusterGo"
+
+  access_config {
+    authentication_mode = "API"
+  }
+
+  role_arn = "arn:aws:iam::778876534404:role/LabRole"
+  version  = "1.32"
+
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.go_public_a.id,
+      aws_subnet.go_public_b.id,
+    ]
+  }
+}
+
+resource "aws_eks_node_group" "example" {
+  cluster_name    = aws_eks_cluster.cluster.name
+  node_group_name = "go-worker"
+  node_role_arn   = "arn:aws:iam::778876534404:role/LabRole"
+  subnet_ids = [
+      aws_subnet.go_public_a.id,
+      aws_subnet.go_public_b.id,
+    ]
+
+  scaling_config {
+    desired_size = 2
+    max_size     = 2
+    min_size     = 1
+  }
+
+  instance_types = ["t3.medium"]
+
+  update_config {
+    max_unavailable = 1
+  }
+}
