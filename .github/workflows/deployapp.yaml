@@ -3,9 +3,9 @@ name: CI/CD Pipeline
 on:
    push:
      branches:
-       - main # Jalankan pipeline saat ada push ke branch main
+       - main 
      paths:
-        - .github/workflows/deployment.yaml
+        - .github/workflows/deployapp.yaml
         - deployment.yaml
 
 jobs:
