@@ -1,36 +1,30 @@
 name: CI/CD Pipeline
  
 on:
-  workflow_run:
-    workflows:
-      - terraform
-    types:
-      - completed
+   push:
+     branches:
+       - main # Jalankan pipeline saat ada push ke branch main
+     paths:
+        - .github/workflows/deployment.yaml
+        - deployment.yaml
 
 jobs:
    install:
-    if: >
-      ${{ github.event.workflow_run.conclusion == 'success' &&
-         github.event.workflow_run.head_branch == 'main' }}
     runs-on: ubuntu-latest
  
     steps:
        - name: Checkout code
          uses: actions/checkout@v3
-       - name: Set up Go
-         uses: actions/setup-go@v4
+ 
+       - name: Set up Python
+         uses: actions/setup-python@v4
          with:
-          go-version: 1.21
+           python-version: 3.13
  
-       #- name: Set up Python
-       #  uses: actions/setup-python@v4
-       #  with:
-       #    python-version: 3.13
- 
-       #- name: Install dependencies
-       #  run: |
-       #    python -m pip install --upgrade pip
-       #    pip install -r requirements.txt
+       - name: Install dependencies
+         run: |
+           python -m pip install --upgrade pip
+           pip install -r requirements.txt
  
    build_and_push_ecr:
      needs: install
