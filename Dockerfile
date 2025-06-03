@@ -5,10 +5,9 @@ FROM golang:1.21
 WORKDIR /app
 
 # Copy semua file ke dalam container (termasuk go.mod, go.sum, dan *.go)
-COPY . .
+COPY main.go .
 
 # Build binary
-RUN go init main.go
 RUN go build -o main
 
 # Expose port yang digunakan aplikasi
