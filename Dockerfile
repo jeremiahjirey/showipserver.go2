@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Build binary
+RUN go init main.go
 RUN go build -o main
 
 # Expose port yang digunakan aplikasi
